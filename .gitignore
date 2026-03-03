@@ -2,6 +2,7 @@ HELP.md
 target/
 .gradle/
 build/
+uploads/
 !**/src/main/**/target/
 !**/src/test/**/target/
 
