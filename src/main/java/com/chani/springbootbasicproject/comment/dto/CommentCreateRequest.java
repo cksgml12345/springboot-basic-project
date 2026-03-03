@@ -4,5 +4,5 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 
 public record CommentCreateRequest(
-        @NotBlank @Size(max = 1000) String content
+        @NotBlank(message = "content는 필수입니다.") @Size(max = 1000, message = "content는 최대 1000자까지 가능합니다.") String content
 ) {}

@@ -4,6 +4,9 @@ import com.chani.springbootbasicproject.comment.Comment;
 import com.chani.springbootbasicproject.comment.CommentRepository;
 import com.chani.springbootbasicproject.comment.dto.CommentCreateRequest;
 import com.chani.springbootbasicproject.domain.User;
+import com.chani.springbootbasicproject.exception.BadRequestException;
+import com.chani.springbootbasicproject.exception.ForbiddenOperationException;
+import com.chani.springbootbasicproject.exception.ResourceNotFoundException;
 import com.chani.springbootbasicproject.post.dto.CommentResponse;
 import com.chani.springbootbasicproject.post.dto.PostCreateRequest;
 import com.chani.springbootbasicproject.post.dto.PostResponse;
@@ -46,7 +49,7 @@ public class PostService {
     public PostResponse update(Long id, PostUpdateRequest request, String email) {
         Post post = findPost(id);
         if (!post.getAuthor().getEmail().equals(email)) {
-            throw new IllegalArgumentException("본인 글만 수정할 수 있습니다.");
+            throw new ForbiddenOperationException("본인 글만 수정할 수 있습니다.");
         }
         post.update(request.title(), request.content());
         post.setTags(resolveTags(request.tags()));
@@ -65,7 +68,7 @@ public class PostService {
     public void delete(Long id, String email) {
         Post post = findPost(id);
         if (!post.getAuthor().getEmail().equals(email)) {
-            throw new IllegalArgumentException("본인 글만 삭제할 수 있습니다.");
+            throw new ForbiddenOperationException("본인 글만 삭제할 수 있습니다.");
         }
         postRepository.delete(post);
     }
@@ -82,24 +85,24 @@ public class PostService {
     public void deleteComment(Long postId, Long commentId, String email) {
         Post post = findPost(postId);
         Comment comment = commentRepository.findById(commentId)
-                .orElseThrow(() -> new IllegalArgumentException("댓글을 찾을 수 없습니다."));
+                .orElseThrow(() -> new ResourceNotFoundException("댓글을 찾을 수 없습니다."));
         if (!comment.getPost().getId().equals(post.getId())) {
-            throw new IllegalArgumentException("해당 게시글의 댓글이 아닙니다.");
+            throw new BadRequestException("해당 게시글의 댓글이 아닙니다.");
         }
         if (!comment.getAuthor().getEmail().equals(email)) {
-            throw new IllegalArgumentException("본인 댓글만 삭제할 수 있습니다.");
+            throw new ForbiddenOperationException("본인 댓글만 삭제할 수 있습니다.");
         }
         commentRepository.delete(comment);
     }
 
     private User findUserByEmail(String email) {
         return userRepository.findByEmail(email)
-                .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
+                .orElseThrow(() -> new ResourceNotFoundException("사용자를 찾을 수 없습니다."));
     }
 
     private Post findPost(Long id) {
         return postRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("게시글을 찾을 수 없습니다."));
+                .orElseThrow(() -> new ResourceNotFoundException("게시글을 찾을 수 없습니다."));
     }
 
     private Set<Tag> resolveTags(List<String> tagNames) {

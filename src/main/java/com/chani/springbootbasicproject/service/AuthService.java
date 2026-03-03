@@ -5,6 +5,8 @@ import com.chani.springbootbasicproject.dto.AuthResponse;
 import com.chani.springbootbasicproject.dto.LoginRequest;
 import com.chani.springbootbasicproject.dto.ProfileResponse;
 import com.chani.springbootbasicproject.dto.SignupRequest;
+import com.chani.springbootbasicproject.exception.BadRequestException;
+import com.chani.springbootbasicproject.exception.ResourceNotFoundException;
 import com.chani.springbootbasicproject.repository.UserRepository;
 import com.chani.springbootbasicproject.security.JwtTokenProvider;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -34,10 +36,10 @@ public class AuthService {
     @Transactional
     public AuthResponse signup(SignupRequest request) {
         if (userRepository.existsByEmail(request.email())) {
-            throw new IllegalArgumentException("이미 사용 중인 이메일입니다.");
+            throw new BadRequestException("이미 사용 중인 이메일입니다.");
         }
         if (userRepository.existsByUsername(request.username())) {
-            throw new IllegalArgumentException("이미 사용 중인 사용자명입니다.");
+            throw new BadRequestException("이미 사용 중인 사용자명입니다.");
         }
 
         User user = new User(
@@ -57,7 +59,7 @@ public class AuthService {
         );
 
         User user = userRepository.findByEmail(request.email())
-                .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
+                .orElseThrow(() -> new ResourceNotFoundException("사용자를 찾을 수 없습니다."));
 
         String token = jwtTokenProvider.generateToken(user.getId(), user.getEmail());
         return new AuthResponse(token, user.getUsername(), user.getEmail());
@@ -65,7 +67,7 @@ public class AuthService {
 
     public ProfileResponse me(String email) {
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
+                .orElseThrow(() -> new ResourceNotFoundException("사용자를 찾을 수 없습니다."));
         return new ProfileResponse(user.getId(), user.getUsername(), user.getEmail());
     }
 }
