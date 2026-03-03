@@ -14,9 +14,14 @@ import com.chani.springbootbasicproject.post.dto.PostUpdateRequest;
 import com.chani.springbootbasicproject.repository.UserRepository;
 import com.chani.springbootbasicproject.tag.Tag;
 import com.chani.springbootbasicproject.tag.TagRepository;
-import jakarta.transaction.Transactional;
 import java.util.*;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class PostService {
@@ -37,6 +42,7 @@ public class PostService {
     }
 
     @Transactional
+    @CacheEvict(value = {"postDetail", "postPage"}, allEntries = true)
     public PostResponse create(PostCreateRequest request, String email) {
         User author = findUserByEmail(email);
         Post post = new Post(request.title(), request.content(), author);
@@ -46,6 +52,7 @@ public class PostService {
     }
 
     @Transactional
+    @CacheEvict(value = {"postDetail", "postPage"}, allEntries = true)
     public PostResponse update(Long id, PostUpdateRequest request, String email) {
         Post post = findPost(id);
         if (!post.getAuthor().getEmail().equals(email)) {
@@ -56,15 +63,29 @@ public class PostService {
         return toResponse(post);
     }
 
+    @Transactional(readOnly = true)
     public List<PostResponse> findAll() {
         return postRepository.findAllByOrderByIdDesc().stream().map(this::toResponse).toList();
     }
 
+    @Cacheable(value = "postPage", key = "#page + '-' + #size")
+    @Transactional(readOnly = true)
+    public Page<PostResponse> findPage(int page, int size) {
+        if (page < 0 || size < 1 || size > 50) {
+            throw new BadRequestException("page는 0 이상, size는 1~50 범위여야 합니다.");
+        }
+        PageRequest pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "id"));
+        return postRepository.findAllBy(pageable).map(this::toResponse);
+    }
+
+    @Cacheable(value = "postDetail", key = "#id")
+    @Transactional(readOnly = true)
     public PostResponse findById(Long id) {
         return toResponse(findPost(id));
     }
 
     @Transactional
+    @CacheEvict(value = {"postDetail", "postPage"}, allEntries = true)
     public void delete(Long id, String email) {
         Post post = findPost(id);
         if (!post.getAuthor().getEmail().equals(email)) {
@@ -74,6 +95,7 @@ public class PostService {
     }
 
     @Transactional
+    @CacheEvict(value = {"postDetail", "postPage"}, allEntries = true)
     public CommentResponse addComment(Long postId, CommentCreateRequest request, String email) {
         Post post = findPost(postId);
         User author = findUserByEmail(email);
@@ -82,6 +104,7 @@ public class PostService {
     }
 
     @Transactional
+    @CacheEvict(value = {"postDetail", "postPage"}, allEntries = true)
     public void deleteComment(Long postId, Long commentId, String email) {
         Post post = findPost(postId);
         Comment comment = commentRepository.findById(commentId)

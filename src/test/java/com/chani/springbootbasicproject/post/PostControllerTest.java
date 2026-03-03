@@ -71,6 +71,10 @@ class PostControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.comments[0].content").value("구조가 깔끔하네요."));
 
+        mockMvc.perform(get("/api/posts/page?page=0&size=10"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content").isArray());
+
         String updatePostJson = """
                 {
                   "title":"JPA 연관관계 고급",

@@ -1,0 +1,9 @@
+version: '3.8'
+services:
+  app:
+    build: .
+    ports:
+      - "8080:8080"
+    environment:
+      - SPRING_PROFILES_ACTIVE=default
+      - JWT_SECRET=${JWT_SECRET:-2c3f9f4e820fa5c552df221759d2db9aeb04df6fd7beeb09d720ab6d955f0f56}

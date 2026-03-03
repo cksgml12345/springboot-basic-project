@@ -8,6 +8,7 @@ import com.chani.springbootbasicproject.post.dto.PostUpdateRequest;
 import jakarta.validation.Valid;
 import java.util.List;
 import org.springframework.http.HttpStatus;
+import org.springframework.data.domain.Page;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
@@ -24,6 +25,14 @@ public class PostController {
     @GetMapping
     public List<PostResponse> findAll() {
         return postService.findAll();
+    }
+
+    @GetMapping("/page")
+    public Page<PostResponse> findPage(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
+    ) {
+        return postService.findPage(page, size);
     }
 
     @GetMapping("/{id}")

@@ -27,7 +27,24 @@ gradle wrapper
 - H2 콘솔: `http://localhost:8080/h2-console`
 - OpenAPI JSON: `http://localhost:8080/v3/api-docs`
 - Swagger UI: `http://localhost:8080/swagger-ui/index.html`
+- 게시글 페이지 조회: `GET http://localhost:8080/api/posts/page?page=0&size=10`
 
-## 다음 확장 아이디어
-- JPA Entity + Repository로 프로젝트/경력 데이터 DB 저장
-- GitHub Actions CI 추가
+## CI/CD
+- GitHub Actions: [ci.yml](.github/workflows/ci.yml)
+- `main` push / PR 시 자동으로 `./gradlew test`, `./gradlew bootJar` 실행
+
+## Docker 배포
+1. 빌드
+```bash
+./gradlew bootJar
+```
+2. 컨테이너 실행
+```bash
+docker compose up --build
+```
+
+## 성능 개선 포인트(적용됨)
+- 게시글 상세/페이지 조회 캐시 적용
+- 게시글 페이지네이션 API 추가
+- 게시글 테이블 인덱스(`author_id`, `title`) 추가
+- `spring.jpa.open-in-view=false` 적용
