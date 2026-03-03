@@ -10,6 +10,14 @@ spring:
     driver-class-name: org.h2.Driver
     username: sa
     password:
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
 
 server:
   port: 8080
+
+jwt:
+  secret: 2c3f9f4e820fa5c552df221759d2db9aeb04df6fd7beeb09d720ab6d955f0f56
+  expiration-ms: 3600000
