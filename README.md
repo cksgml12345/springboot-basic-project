@@ -9,6 +9,7 @@
 - Spring Web
 - Validation
 - H2 Database
+- Swagger(OpenAPI)
 
 ## 실행 방법
 ```bash
@@ -24,8 +25,9 @@ gradle wrapper
 - 홈: `GET http://localhost:8080/`
 - 프로젝트 목록: `GET http://localhost:8080/api/projects`
 - H2 콘솔: `http://localhost:8080/h2-console`
+- OpenAPI JSON: `http://localhost:8080/v3/api-docs`
+- Swagger UI: `http://localhost:8080/swagger-ui/index.html`
 
 ## 다음 확장 아이디어
 - JPA Entity + Repository로 프로젝트/경력 데이터 DB 저장
-- Swagger(OpenAPI) 문서화
 - GitHub Actions CI 추가
